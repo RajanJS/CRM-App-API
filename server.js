@@ -99,6 +99,40 @@
  	});
  });
 
+ apiRouter.route('/users')
+ 	// create a user (accessed at POST http://localhost:8080/api/users)
+ 	.post(function(req, res) {
+ 		// create a new instance of the User model
+ 		var user = new User();
+ 		// set the users information (comes from the request)
+ 		user.name = req.body.name;
+ 		user.username = req.body.username;
+ 		user.password = req.body.password;
+
+ 		// check if the any value are left blank
+ 		if (user.name === '' || user.username === '' || user.password === '') {
+ 			return res.status(400).json({
+ 				success: false
+ 			});
+ 		}
+ 		// save the user and check for errors
+ 		user.save(function(err) {
+ 			if (err) {
+ 				// duplicate entry
+ 				if (err.code == 11000)
+ 					return res.status(400).json({
+ 						success: false,
+ 						message: 'A user with that username already exists. '
+ 					});
+ 				else
+ 					return res.status(500).send(err);
+ 			}
+ 			res.json({
+ 				message: 'User created!'
+ 			});
+ 		});
+ 	});
+
  // middleware to use for all requests
  apiRouter.use(function(req, res, next) {
  	// do logging
@@ -144,38 +178,6 @@
  // on routes that end in /users ie. handle multiple routes for the same URI /users
  // ----------------------------------------------------
  apiRouter.route('/users')
- 	// create a user (accessed at POST http://localhost:8080/api/users)
- 	.post(function(req, res) {
- 		// create a new instance of the User model
- 		var user = new User();
- 		// set the users information (comes from the request)
- 		user.name = req.body.name;
- 		user.username = req.body.username;
- 		user.password = req.body.password;
-
- 		// check if the any value are left blank
- 		if (user.name === '' || user.username === '' || user.password === '') {
- 			return res.status(400).json({
- 				success: false
- 			});
- 		}
- 		// save the user and check for errors
- 		user.save(function(err) {
- 			if (err) {
- 				// duplicate entry
- 				if (err.code == 11000)
- 					return res.status(400).json({
- 						success: false,
- 						message: 'A user with that username already exists. '
- 					});
- 				else
- 					return res.status(500).send(err);
- 			}
- 			res.json({
- 				message: 'User created!'
- 			});
- 		});
- 	})
 
  // get all the users (accessed at GET http://localhost:8080/api/users)
  .get(function(req, res) {
